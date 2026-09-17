@@ -4,6 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>تحديات كروية ⚽</title>
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#D4AF37">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="تحديات كروية">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <link rel="icon" type="image/png" href="icon-192.png">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -128,6 +135,27 @@
             z-index: 1000;
         }
 
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: #D4AF37;
+            color: #0D0D0D;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 8px 25px rgba(212, 175, 55, 0.5);
+            z-index: 1000;
+            display: none;
+        }
+
+        .install-btn.show { display: block; }
+
         .fade-in {
             animation: fadeIn 1s ease;
         }
@@ -140,6 +168,7 @@
 </head>
 <body>
     <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊</button>
+    <button class="install-btn" id="installBtn">📲 ثبّت التطبيق</button>
 
     <div class="container fade-in">
         <div class="logo">⚽</div>
@@ -159,7 +188,6 @@
 
     <script src="sounds.js"></script>
     <script>
-        // إضافة صوت لكل الأزرار
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".btn").forEach(btn => {
                 btn.addEventListener("click", () => {
@@ -167,6 +195,39 @@
                     playClick();
                 });
             });
+        });
+
+        // تسجيل Service Worker
+        if ("serviceWorker" in navigator) {
+            window.addEventListener("load", () => {
+                navigator.serviceWorker.register("service-worker.js")
+                    .then((reg) => console.log("SW registered:", reg.scope))
+                    .catch((err) => console.log("SW failed:", err));
+            });
+        }
+
+        // زر التثبيت (PWA)
+        let deferredPrompt = null;
+        const installBtn = document.getElementById("installBtn");
+
+        window.addEventListener("beforeinstallprompt", (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installBtn.classList.add("show");
+        });
+
+        installBtn.addEventListener("click", async () => {
+            if (!deferredPrompt) return;
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log("Install choice:", outcome);
+            deferredPrompt = null;
+            installBtn.classList.remove("show");
+        });
+
+        window.addEventListener("appinstalled", () => {
+            console.log("PWA installed");
+            installBtn.classList.remove("show");
         });
     </script>
 </body>
