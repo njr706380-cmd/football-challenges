@@ -207,6 +207,15 @@
             z-index: 1000;
         }
 
+        .question-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+            border: 2px solid rgba(212, 175, 55, 0.4);
+            border-radius: 20px;
+            padding: 25px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
@@ -313,10 +322,10 @@
             </div>
 
             <div style="text-align: center; margin-bottom: 15px; color: #888;">
-                السؤال <span id="gameProgress" style="color: #D4AF37; font-weight: 900;">1</span> من 25
+                السؤال <span id="gameProgress" style="color: #D4AF37; font-weight: 900;">1</span> من 50
             </div>
 
-            <div class="question-box" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05)); border: 2px solid rgba(212, 175, 55, 0.4); border-radius: 20px; padding: 25px 20px; margin-bottom: 20px; text-align: center;">
+            <div class="question-box">
                 <div class="question-text" id="gameQuestion" style="font-size: 20px; font-weight: 700;">جاري التحميل...</div>
             </div>
 
@@ -358,7 +367,6 @@
     <script src="online.js"></script>
 
     <script>
-        // أصوات الأزرار
         document.addEventListener("DOMContentLoaded", () => {
             document.querySelectorAll(".btn").forEach(btn => {
                 btn.addEventListener("click", () => {
