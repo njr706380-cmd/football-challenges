@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>مصغّر الأيقونات</title>
+<style>
+    body {
+        background: #0D0D0D;
+        color: #D4AF37;
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+    }
+    h1 { margin-bottom: 20px; font-size: 24px; }
+    input[type=file] {
+        display: block;
+        margin: 20px auto;
+        padding: 15px;
+        background: #1a1a1a;
+        border: 2px dashed #D4AF37;
+        border-radius: 15px;
+        color: #D4AF37;
+        font-size: 16px;
+        width: 90%;
+        max-width: 400px;
+    }
+    .preview-box {
+        margin: 20px 0;
+        text-align: center;
+    }
+    .preview-box canvas {
+        border: 2px solid #D4AF37;
+        border-radius: 15px;
+        margin: 10px;
+        background: #000;
+    }
+    .label { font-size: 14px; color: #F4D03F; margin-top: 10px; }
+    .btn {
+        background: #D4AF37;
+        color: #0D0D0D;
+        padding: 12px 25px;
+        border: none;
+        border-radius: 10px;
+        font-weight: 700;
+        font-size: 16px;
+        margin: 10px 5px;
+        cursor: pointer;
+        font-family: inherit;
+    }
+    .btn:hover { background: #F4D03F; }
+    .status { margin: 15px 0; font-size: 16px; color: #aaa; }
+    .result { display: none; }
+    .result.show { display: block; }
+</style>
+</head>
+<body>
+<h1>📐 مصغّر الأيقونات</h1>
+
+<div id="step1">
+    <p style="color: #aaa; font-size: 14px; margin-bottom: 20px;">
+        ارفع الصورة الأصلية (1024×1024) وسنقوم بتصغيرها للنسختين المطلوبتين
+    </p>
+    <input type="file" id="fileInput" accept="image/*">
+</div>
+
+<div class="status" id="status"></div>
+
+<div class="result" id="result">
+    <div class="preview-box">
+        <div class="label">📱 512 × 512</div>
+        <canvas id="c512" width="512" height="512"></canvas>
+        <br>
+        <button class="btn" onclick="download('c512','icon-512.png')">📥 تنزيل icon-512.png</button>
+    </div>
+
+    <div class="preview-box">
+        <div class="label">📱 192 × 192</div>
+        <canvas id="c192" width="192" height="192"></canvas>
+        <br>
+        <button class="btn" onclick="download('c192','icon-192.png')">📥 تنزيل icon-192.png</button>
+    </div>
+</div>
+
+<script>
+const fileInput = document.getElementById("fileInput");
+const statusEl = document.getElementById("status");
+const resultEl = document.getElementById("result");
+
+fileInput.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    statusEl.textContent = "⏳ جاري التحميل...";
+    const img = new Image();
+    const reader = new FileReader();
+
+    reader.onload = (evt) => {
+        img.onload = () => {
+            statusEl.textContent = "✅ تم! " + img.width + "×" + img.height + " → نظبّط النسختين";
+            drawToCanvas(img, "c512", 512);
+            drawToCanvas(img, "c192", 192);
+            resultEl.classList.add("show");
+        };
+        img.src = evt.target.result;
+    };
+    reader.readAsDataURL(file);
+});
+
+function drawToCanvas(img, canvasId, size) {
+    const canvas = document.getElementById(canvasId);
+    const ctx = canvas.getContext("2d");
+    ctx.clearRect(0, 0, size, size);
+    ctx.drawImage(img, 0, 0, size, size);
+}
+
+function download(canvasId, filename) {
+    const canvas = document.getElementById(canvasId);
+    const link = document.createElement("a");
+    link.download = filename;
+    link.href = canvas.toDataURL("image/png");
+    link.click();
+}
+</script>
+</body>
+</html>
