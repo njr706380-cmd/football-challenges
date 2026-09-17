@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>لعب أونلاين - تحديات كروية ⚽</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Cairo', sans-serif;
+            background: linear-gradient(135deg, #0D0D0D 0%, #1a1a1a 50%, #0D0D0D 100%);
+            color: #FFFFFF;
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 32px;
+            font-weight: 900;
+            background: linear-gradient(135deg, #D4AF37, #F4D03F);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            color: #888;
+            font-size: 14px;
+        }
+
+        /* ====== الشاشات ====== */
+        .screen { display: none; }
+        .screen.active { display: block; animation: fadeIn 0.4s ease; }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(15px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* ====== الأزرار الرئيسية ====== */
+        .main-buttons {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 20px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 20px;
+            font-weight: 700;
+            border: 2px solid #D4AF37;
+            background: transparent;
+            color: #D4AF37;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn:active { transform: scale(0.98); }
+        .btn:hover {
+            background: #D4AF37;
+            color: #0D0D0D;
+        }
+
+        .btn.primary {
+            background: #D4AF37;
+            color: #0D0D0D;
+        }
+
+        .btn.primary:hover {
+            background: #F4D03F;
+        }
+
+        .btn.small {
+            padding: 12px 20px;
+            font-size: 16px;
+        }
+
+        .btn.back {
+            background: transparent;
+            color: #888;
+            border-color: #555;
+            padding: 10px 15px;
+            font-size: 14px;
+        }
+
+        /* ====== الحقول ====== */
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            color: #D4AF37;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px;
+            font-family: 'Cairo', sans-serif;
+            font-size: 18px;
+            font-weight: 700;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 12px;
+            color: #FFFFFF;
+            outline: none;
+            transition: border 0.2s;
+        }
+
+        .input-group input:focus {
+            border-color: #D4AF37;
+        }
+
+        .input-group input::placeholder {
+            color: #666;
+        }
+
+        /* كود الغرفة */
+        .code-input {
+            font-size: 32px !important;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        /* ====== صندوق الرسائل ====== */
+        .message {
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            font-weight: 700;
+            text-align: center;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            border: 1px solid #E74C3C;
+            color: #E74C3C;
+        }
+
+        .message.success {
+            background: rgba(39, 174, 96, 0.2);
+            border: 1px solid #27AE60;
+            color: #27AE60;
+        }
+
+        /* ====== اللوبي ====== */
+        .room-code-box {
+            background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05));
+            border: 2px solid #D4AF37;
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .room-code-label {
+            color: #888;
+            font-size: 14px;
+            margin-bottom: 10px;
+        }
+
+        .room-code-display {
+            font-size: 56px;
+            font-weight: 900;
+            color: #D4AF37;
+            letter-spacing: 12px;
+            margin: 15px 0;
+        }
+
+        .copy-btn {
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-family: 'Cairo', sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        .copy-btn:hover {
+            background: #D4AF37;
+            color: #0D0D0D;
+        }
+
+        /* ====== اللاعبون ====== */
+        .players {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .player-card {
+            flex: 1;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(212, 175, 55, 0.3);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .player-card.you {
+            border-color: #D4AF37;
+            background: rgba(212, 175, 55, 0.1);
+        }
+
+        .player-card.empty {
+            border-style: dashed;
+            border-color: #555;
+            opacity: 0.5;
+        }
+
+        .player-icon { font-size: 40px; margin-bottom: 10px; }
+        .player-name {
+            font-weight: 700;
+            font-size: 18px;
+            color: #D4AF37;
+        }
+        .player-status {
+            font-size: 12px;
+            color: #888;
+            margin-top: 5px;
+        }
+        .player-score {
+            font-size: 28px;
+            font-weight: 900;
+            color: #D4AF37;
+            margin-top: 10px;
+        }
+
+        /* ====== الانتظار ====== */
+        .waiting {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .waiting-spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(212, 175, 55, 0.2);
+            border-top-color: #D4AF37;
+            border-radius: 50%;
+            margin: 20px auto;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- ====== الشاشة 1: الصفحة الرئيسية للأونلاين ====== -->
+        <div class="screen active" id="screen-home">
+            <div class="header">
+                <h1>🌐 لعب أونلاين</h1>
+                <p>تحدَّ أصدقاءك في تحدي 30 ثانية</p>
+            </div>
+
+            <div id="homeMessage"></div>
+
+            <div class="main-buttons">
+                <button class="btn primary" onclick="showScreen('create')">🎮 إنشاء غرفة</button>
+                <button class="btn" onclick="showScreen('join')">🚪 الانضمام لغرفة</button>
+                <a href="index.html" class="btn small back">← رجوع للرئيسية</a>
+            </div>
+        </div>
+
+        <!-- ====== الشاشة 2: إنشاء غرفة ====== -->
+        <div class="screen" id="screen-create">
+            <div class="header">
+                <h1>🎮 إنشاء غرفة</h1>
+                <p>ادخل اسمك لإنشاء غرفة جديدة</p>
+            </div>
+
+            <div id="createMessage"></div>
+
+            <div class="input-group">
+                <label>اسمك</label>
+                <input type="text" id="hostName" placeholder="مثلاً: أحمد" maxlength="20" autocomplete="off">
+            </div>
+
+            <div class="main-buttons">
+                <button class="btn primary" onclick="handleCreateRoom()">🎯 إنشاء</button>
+                <button class="btn small back" onclick="showScreen('home')">← رجوع</button>
+            </div>
+        </div>
+
+        <!-- ====== الشاشة 3: الانضمام لغرفة ====== -->
+        <div class="screen" id="screen-join">
+            <div class="header">
+                <h1>🚪 الانضمام لغرفة</h1>
+                <p>ادخل كود الغرفة واسمك</p>
+            </div>
+
+            <div id="joinMessage"></div>
+
+            <div class="input-group">
+                <label>كود الغرفة</label>
+                <input type="text" id="roomCode" placeholder="ABCD" maxlength="4" class="code-input" autocomplete="off">
+            </div>
+
+            <div class="input-group">
+                <label>اسمك</label>
+                <input type="text" id="guestName" placeholder="مثلاً: علي" maxlength="20" autocomplete="off">
+            </div>
+
+            <div class="main-buttons">
+                <button class="btn primary" onclick="handleJoinRoom()">🎯 انضمام</button>
+                <button class="btn small back" onclick="showScreen('home')">← رجوع</button>
+            </div>
+        </div>
+
+        <!-- ====== الشاشة 4: اللوبي (انتظار اللاعب الآخر) ====== -->
+        <div class="screen" id="screen-lobby">
+            <div class="header">
+                <h1>⏳ غرفة الانتظار</h1>
+                <p id="lobbySubtitle">شارك الكود مع صديقك</p>
+            </div>
+
+            <div class="room-code-box" id="roomCodeBox">
+                <div class="room-code-label">كود الغرفة</div>
+                <div class="room-code-display" id="displayRoomCode">----</div>
+                <button class="copy-btn" onclick="copyRoomCode()">📋 نسخ الكود</button>
+            </div>
+
+            <div class="players">
+                <div class="player-card you" id="hostCard">
+                    <div class="player-icon">👤</div>
+                    <div class="player-name" id="lobbyHostName">-</div>
+                    <div class="player-status">أنت (المضيف)</div>
+                </div>
+
+                <div class="player-card empty" id="guestCard">
+                    <div class="player-icon">👥</div>
+                    <div class="player-name" id="lobbyGuestName">في الانتظار...</div>
+                    <div class="player-status" id="guestStatus">لم ينضم بعد</div>
+                </div>
+            </div>
+
+            <div class="waiting" id="waitingBox">
+                <div class="waiting-spinner"></div>
+                <p style="color: #888;">في انتظار انضمام اللاعب الثاني...</p>
+            </div>
+
+            <div class="main-buttons hidden" id="lobbyButtons">
+                <button class="btn primary" onclick="startOnlineGame()">🚀 ابدأ التحدي</button>
+                <button class="btn small back" onclick="leaveRoom()">← مغادرة الغرفة</button>
+            </div>
+        </div>
+
+        <!-- ====== الشاشة 5: شاشة اللعب الأونلاين ====== -->
+        <div class="screen" id="screen-game">
+            <div class="players" style="margin-bottom: 15px;">
+                <div class="player-card you">
+                    <div class="player-name" id="gameHostName">-</div>
+                    <div class="player-score" id="gameHostScore">0</div>
+                </div>
+                <div class="player-card">
+                    <div class="player-name" id="gameGuestName">-</div>
+                    <div class="player-score" id="gameGuestScore">0</div>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-bottom: 15px; color: #888;">
+                السؤال <span id="gameProgress" style="color: #D4AF37; font-weight: 900;">1</span> من 25
+            </div>
+
+            <div class="question-box" style="background: linear-gradient(135deg, rgba(212, 175, 55, 0.15), rgba(212, 175, 55, 0.05)); border: 2px solid rgba(212, 175, 55, 0.4); border-radius: 20px; padding: 25px 20px; margin-bottom: 20px; text-align: center;">
+                <div class="question-text" id="gameQuestion" style="font-size: 20px; font-weight: 700;">جاري التحميل...</div>
+            </div>
+
+            <div id="gameAnswers" style="display: flex; flex-direction: column; gap: 12px;"></div>
+        </div>
+
+        <!-- ====== الشاشة 6: النتيجة النهائية ====== -->
+        <div class="screen" id="screen-result">
+            <div class="header">
+                <h1 id="resultTitle">🏆 انتهى التحدي!</h1>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <div style="font-size: 60px; margin-bottom: 10px;" id="resultEmoji">🎉</div>
+                <div style="font-size: 32px; font-weight: 900; color: #D4AF37; margin-bottom: 20px;" id="resultMessage">-</div>
+            </div>
+
+            <div class="players" style="margin-bottom: 25px;">
+                <div class="player-card">
+                    <div class="player-name" id="finalHostName">-</div>
+                    <div class="player-score" id="finalHostScore">0</div>
+                </div>
+                <div class="player-card">
+                    <div class="player-name" id="finalGuestName">-</div>
+                    <div class="player-score" id="finalGuestScore">0</div>
+                </div>
+            </div>
+
+            <div class="main-buttons">
+                <button class="btn primary" onclick="location.reload()">🔄 لعبة جديدة</button>
+                <a href="index.html" class="btn small back">← الرئيسية</a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK (compat) -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-database-compat.js"></script>
+
+    <script src="firebase-config.js"></script>
+    <script src="questions.js"></script>
+    <script src="online.js"></script>
+</body>
+  </html>
