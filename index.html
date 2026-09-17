@@ -8,11 +8,7 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body {
             font-family: 'Cairo', sans-serif;
@@ -117,6 +113,21 @@
             text-decoration: none;
         }
 
+        .sound-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
         .fade-in {
             animation: fadeIn 1s ease;
         }
@@ -128,6 +139,8 @@
     </style>
 </head>
 <body>
+    <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊</button>
+
     <div class="container fade-in">
         <div class="logo">⚽</div>
         <h1>تحديات كروية</h1>
@@ -143,5 +156,18 @@
             صنع بـ ❤️ | <a href="https://github.com/njr706380-cmd">njr706380-cmd</a>
         </div>
     </div>
+
+    <script src="sounds.js"></script>
+    <script>
+        // إضافة صوت لكل الأزرار
+        document.addEventListener("DOMContentLoaded", () => {
+            document.querySelectorAll(".btn").forEach(btn => {
+                btn.addEventListener("click", () => {
+                    initAudio();
+                    playClick();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
