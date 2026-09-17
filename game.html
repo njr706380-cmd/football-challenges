@@ -27,7 +27,6 @@
             flex-direction: column;
         }
 
-        /* ====== شريط المعلومات ====== */
         .info-bar {
             display: flex;
             justify-content: space-between;
@@ -39,23 +38,10 @@
             margin-bottom: 15px;
         }
 
-        .info-item {
-            text-align: center;
-        }
+        .info-item { text-align: center; }
+        .info-label { font-size: 11px; color: #888; margin-bottom: 3px; }
+        .info-value { font-size: 20px; font-weight: 900; color: #D4AF37; }
 
-        .info-label {
-            font-size: 11px;
-            color: #888;
-            margin-bottom: 3px;
-        }
-
-        .info-value {
-            font-size: 20px;
-            font-weight: 900;
-            color: #D4AF37;
-        }
-
-        /* ====== المؤقت ====== */
         .timer-container {
             position: relative;
             width: 90px;
@@ -63,16 +49,8 @@
             margin: 15px auto;
         }
 
-        .timer-circle {
-            transform: rotate(-90deg);
-        }
-
-        .timer-bg {
-            fill: none;
-            stroke: rgba(212, 175, 55, 0.2);
-            stroke-width: 8;
-        }
-
+        .timer-circle { transform: rotate(-90deg); }
+        .timer-bg { fill: none; stroke: rgba(212, 175, 55, 0.2); stroke-width: 8; }
         .timer-progress {
             fill: none;
             stroke: #D4AF37;
@@ -80,7 +58,6 @@
             stroke-linecap: round;
             transition: stroke-dashoffset 0.3s linear, stroke 0.3s;
         }
-
         .timer-text {
             position: absolute;
             top: 50%;
@@ -90,14 +67,11 @@
             font-weight: 900;
             color: #D4AF37;
         }
-
         .timer-danger .timer-progress { stroke: #E74C3C; }
         .timer-danger .timer-text { color: #E74C3C; }
-
         .timer-warning .timer-progress { stroke: #F39C12; }
         .timer-warning .timer-text { color: #F39C12; }
 
-        /* ====== السؤال ====== */
         .difficulty-badge {
             display: inline-block;
             padding: 4px 14px;
@@ -106,7 +80,6 @@
             font-weight: 700;
             margin-bottom: 10px;
         }
-
         .diff-easy { background: rgba(39, 174, 96, 0.2); color: #27AE60; border: 1px solid #27AE60; }
         .diff-medium { background: rgba(243, 156, 18, 0.2); color: #F39C12; border: 1px solid #F39C12; }
         .diff-hard { background: rgba(231, 76, 60, 0.2); color: #E74C3C; border: 1px solid #E74C3C; }
@@ -120,30 +93,14 @@
             text-align: center;
             animation: slideIn 0.4s ease;
         }
-
         @keyframes slideIn {
             from { opacity: 0; transform: translateY(-20px); }
             to { opacity: 1; transform: translateY(0); }
         }
+        .category { font-size: 12px; color: #888; margin-bottom: 8px; }
+        .question-text { font-size: 20px; font-weight: 700; line-height: 1.5; }
 
-        .category {
-            font-size: 12px;
-            color: #888;
-            margin-bottom: 8px;
-        }
-
-        .question-text {
-            font-size: 20px;
-            font-weight: 700;
-            line-height: 1.5;
-        }
-
-        /* ====== الأجوبة ====== */
-        .answers {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+        .answers { display: flex; flex-direction: column; gap: 12px; }
 
         .answer-btn {
             padding: 18px 20px;
@@ -158,52 +115,23 @@
             cursor: pointer;
             transition: all 0.2s;
         }
-
-        .answer-btn:active {
-            transform: scale(0.98);
-        }
-
-        .answer-btn:hover {
-            border-color: #D4AF37;
-            background: rgba(212, 175, 55, 0.1);
-        }
-
+        .answer-btn:active { transform: scale(0.98); }
+        .answer-btn:hover { border-color: #D4AF37; background: rgba(212, 175, 55, 0.1); }
         .answer-btn.correct {
             background: rgba(39, 174, 96, 0.3) !important;
             border-color: #27AE60 !important;
             color: #27AE60;
         }
-
         .answer-btn.wrong {
             background: rgba(231, 76, 60, 0.3) !important;
             border-color: #E74C3C !important;
             color: #E74C3C;
         }
+        .answer-btn:disabled { cursor: not-allowed; opacity: 0.7; }
 
-        .answer-btn:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-
-        /* ====== النهاية ====== */
-        .end-screen {
-            text-align: center;
-            padding: 30px 20px;
-            animation: fadeIn 0.5s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .end-title {
-            font-size: 32px;
-            font-weight: 900;
-            color: #D4AF37;
-            margin-bottom: 20px;
-        }
-
+        .end-screen { text-align: center; padding: 30px 20px; animation: fadeIn 0.5s ease; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        .end-title { font-size: 32px; font-weight: 900; color: #D4AF37; margin-bottom: 20px; }
         .end-score {
             font-size: 70px;
             font-weight: 900;
@@ -213,12 +141,7 @@
             background-clip: text;
             margin: 20px 0;
         }
-
-        .end-message {
-            font-size: 18px;
-            color: #999;
-            margin-bottom: 30px;
-        }
+        .end-message { font-size: 18px; color: #999; margin-bottom: 30px; }
 
         .btn {
             padding: 16px 30px;
@@ -233,27 +156,11 @@
             display: inline-block;
             margin: 8px;
         }
+        .btn-primary { background: #D4AF37; color: #0D0D0D; }
+        .btn-primary:hover { background: #F4D03F; transform: translateY(-2px); }
+        .btn-secondary { background: transparent; color: #D4AF37; }
+        .btn-secondary:hover { background: rgba(212, 175, 55, 0.1); }
 
-        .btn-primary {
-            background: #D4AF37;
-            color: #0D0D0D;
-        }
-
-        .btn-primary:hover {
-            background: #F4D03F;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background: transparent;
-            color: #D4AF37;
-        }
-
-        .btn-secondary:hover {
-            background: rgba(212, 175, 55, 0.1);
-        }
-
-        /* ====== بونص ====== */
         .bonus-popup {
             position: fixed;
             top: 50%;
@@ -269,23 +176,38 @@
             z-index: 100;
             box-shadow: 0 20px 60px rgba(212, 175, 55, 0.5);
         }
-
         @keyframes popIn {
             0% { transform: translate(-50%, -50%) scale(0); }
             50% { transform: translate(-50%, -50%) scale(1.2); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
 
+        .sound-toggle {
+            position: fixed;
+            top: 15px;
+            left: 15px;
+            background: rgba(212, 175, 55, 0.2);
+            border: 1px solid #D4AF37;
+            color: #D4AF37;
+            width: 45px;
+            height: 45px;
+            border-radius: 50%;
+            font-size: 20px;
+            cursor: pointer;
+            z-index: 1000;
+        }
+
         .hidden { display: none !important; }
     </style>
 </head>
 <body>
+    <button class="sound-toggle" id="soundBtn" onclick="toggleSound()">🔊</button>
+
     <div class="game-container">
-        <!-- شريط المعلومات -->
         <div class="info-bar">
             <div class="info-item">
                 <div class="info-label">السؤال</div>
-                <div class="info-value" id="qProgress">1/25</div>
+                <div class="info-value" id="qProgress">1/50</div>
             </div>
             <div class="info-item">
                 <div class="info-label">النقاط</div>
@@ -297,7 +219,6 @@
             </div>
         </div>
 
-        <!-- المؤقت -->
         <div class="timer-container" id="timerBox">
             <svg class="timer-circle" width="90" height="90">
                 <circle class="timer-bg" cx="45" cy="45" r="38"></circle>
@@ -307,7 +228,6 @@
             <div class="timer-text" id="timerText">30</div>
         </div>
 
-        <!-- السؤال -->
         <div id="questionArea">
             <div style="text-align: center;">
                 <span class="difficulty-badge" id="diffBadge">سهل</span>
@@ -319,7 +239,6 @@
             <div class="answers" id="answersBox"></div>
         </div>
 
-        <!-- شاشة النهاية -->
         <div class="end-screen hidden" id="endScreen">
             <div class="end-title">🏆 انتهى التحدي!</div>
             <div class="end-score" id="finalScore">0</div>
@@ -331,7 +250,8 @@
         </div>
     </div>
 
+    <script src="sounds.js"></script>
     <script src="questions.js"></script>
     <script src="game.js"></script>
 </body>
-  </html>
+                </html>
