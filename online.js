@@ -1,14 +1,11 @@
-// online.js
-// منطق اللعب الأونلاين
+// online.js - منطق الأونلاين مع الأصوات
 
-// ============ الحالة العامة ============
 let currentRoomCode = null;
 let isHost = false;
 let myName = "";
 let myRole = "";
 let roomWatcher = null;
 
-// حالة اللعبة الشخصية
 let myQuestions = [];
 let myIndex = 0;
 let myScore = 0;
@@ -16,8 +13,8 @@ let myTimer = null;
 let myTimeLeft = 30;
 let myAnswered = false;
 let myStartTime = 0;
+let lastTickSecond = 30;
 
-// ============ التنقل بين الشاشات ============
 function showScreen(name) {
     document.querySelectorAll(".screen").forEach(s => s.classList.remove("active"));
     const el = document.getElementById("screen-" + name);
@@ -25,7 +22,6 @@ function showScreen(name) {
     window.scrollTo(0, 0);
 }
 
-// ============ رسائل ============
 function showMessage(elId, text, type) {
     const el = document.getElementById(elId);
     if (!el) return;
@@ -33,8 +29,10 @@ function showMessage(elId, text, type) {
     setTimeout(() => { el.innerHTML = ""; }, 3000);
 }
 
-// ============ إنشاء غرفة ============
 async function handleCreateRoom() {
+    initAudio();
+    playClick();
+
     const name = document.getElementById("hostName").value.trim();
     if (name.length < 2) {
         showMessage("createMessage", "الاسم قصير جداً", "error");
@@ -44,7 +42,6 @@ async function handleCreateRoom() {
     try {
         showMessage("createMessage", "جاري الإنشاء...", "success");
         const code = await createRoom(name);
-
         currentRoomCode = code;
         isHost = true;
         myName = name;
@@ -57,16 +54,16 @@ async function handleCreateRoom() {
         document.getElementById("displayRoomCode").textContent = code;
         document.getElementById("lobbyHostName").textContent = name;
         showScreen("lobby");
-
         startWatchingRoom();
-
     } catch (e) {
         showMessage("createMessage", e.message, "error");
     }
 }
 
-// ============ الانضمام لغرفة ============
 async function handleJoinRoom() {
+    initAudio();
+    playClick();
+
     const code = document.getElementById("roomCode").value.trim().toUpperCase();
     const name = document.getElementById("guestName").value.trim();
 
@@ -82,7 +79,6 @@ async function handleJoinRoom() {
     try {
         showMessage("joinMessage", "جاري الانضمام...", "success");
         await joinRoom(code, name);
-
         currentRoomCode = code;
         isHost = false;
         myName = name;
@@ -97,16 +93,15 @@ async function handleJoinRoom() {
         document.getElementById("guestStatus").textContent = "أنت";
         document.getElementById("guestCard").classList.remove("empty");
         showScreen("lobby");
-
         startWatchingRoom();
-
     } catch (e) {
         showMessage("joinMessage", e.message, "error");
     }
 }
 
-// ============ نسخ كود الغرفة ============
 function copyRoomCode() {
+    initAudio();
+    playClick();
     if (!currentRoomCode) return;
     navigator.clipboard.writeText(currentRoomCode).then(() => {
         alert("✅ تم نسخ الكود: " + currentRoomCode);
@@ -115,14 +110,11 @@ function copyRoomCode() {
     });
 }
 
-// ============ مراقبة الغرفة ============
 function startWatchingRoom() {
     if (roomWatcher) roomWatcher();
-
     roomWatcher = watchRoom(currentRoomCode, (room) => {
         if (!room) return;
 
-        // ===== تحديث أسماء اللاعبين =====
         if (room.host) {
             document.getElementById("lobbyHostName").textContent = room.host.name;
             document.getElementById("gameHostName").textContent = room.host.name;
@@ -140,7 +132,6 @@ function startWatchingRoom() {
             document.getElementById("finalGuestScore").textContent = room.guest.score || 0;
         }
 
-        // ===== لوبي: إذا انضم الضيف =====
         if (room.status === "waiting" && room.host && room.guest) {
             document.getElementById("waitingBox").classList.add("hidden");
             if (isHost) {
@@ -148,17 +139,14 @@ function startWatchingRoom() {
             }
         }
 
-        // ===== بدء اللعبة لما المضيف يضغط =====
         if (room.status === "playing" && myQuestions.length === 0) {
             startPlayingOnline(room);
         }
 
-        // ===== تحديث نقاط الخصم أثناء اللعب =====
         if (room.status === "playing") {
             updateScores(room);
         }
 
-        // ===== انتهى الطرفان =====
         if (room.status === "playing" &&
             room.host && room.host.finished &&
             room.guest && room.guest.finished &&
@@ -168,33 +156,30 @@ function startWatchingRoom() {
     });
 }
 
-// ============ بدء اللعبة (المضيف) ============
 async function startOnlineGame() {
     if (!isHost) return;
+    initAudio();
+    playClick();
 
     const questions = getRandomQuestions();
-
     initFirebase();
     const roomRef = db.ref("rooms/" + currentRoomCode);
-
     await roomRef.update({
         status: "playing",
         questions: questions
     });
 }
 
-// ============ بدء اللعب (كلا اللاعبين) ============
 function startPlayingOnline(room) {
     myQuestions = room.questions || [];
     myIndex = 0;
     myScore = 0;
     myAnswered = false;
-
     showScreen("game");
-    showOnlineQuestion();
+    playWhistle();
+    setTimeout(() => showOnlineQuestion(), 500);
 }
 
-// ============ عرض سؤال ============
 function showOnlineQuestion() {
     if (myIndex >= myQuestions.length) {
         finishMyGame();
@@ -222,9 +207,9 @@ function showOnlineQuestion() {
     startOnlineTimer();
 }
 
-// ============ المؤقت ============
 function startOnlineTimer() {
     myTimeLeft = 30;
+    lastTickSecond = 30;
     myStartTime = Date.now();
 
     if (myTimer) clearInterval(myTimer);
@@ -235,11 +220,16 @@ function startOnlineTimer() {
             myTimeLeft = 0;
             clearInterval(myTimer);
             if (!myAnswered) handleOnlineTimeout();
+            return;
+        }
+        const curSec = Math.ceil(myTimeLeft);
+        if (curSec !== lastTickSecond && curSec > 0 && curSec <= 10) {
+            playTick();
+            lastTickSecond = curSec;
         }
     }, 100);
 }
 
-// ============ معالجة الإجابة ============
 async function handleOnlineAnswer(selectedIndex) {
     if (myAnswered) return;
     myAnswered = true;
@@ -266,13 +256,15 @@ async function handleOnlineAnswer(selectedIndex) {
     });
 
     if (isCorrect) {
+        playCorrect();
         const basePoints = q.d === "easy" ? 1 : q.d === "medium" ? 2 : 3;
         const elapsed = (Date.now() - myStartTime) / 1000;
         let bonus = 0;
         if (elapsed <= 5) bonus = 1;
         else if (elapsed <= 10) bonus = 0.5;
-
         myScore += basePoints + bonus;
+    } else {
+        playWrong();
     }
 
     await updateMyScore();
@@ -283,10 +275,10 @@ async function handleOnlineAnswer(selectedIndex) {
     }, 1200);
 }
 
-// ============ انتهى الوقت ============
 async function handleOnlineTimeout() {
     if (myAnswered) return;
     myAnswered = true;
+    playWrong();
 
     const q = myQuestions[myIndex];
     const buttons = document.querySelectorAll("#gameAnswers button");
@@ -307,7 +299,6 @@ async function handleOnlineTimeout() {
     }, 1200);
 }
 
-// ============ تحديث نقاطي ============
 async function updateMyScore() {
     initFirebase();
     const roomRef = db.ref("rooms/" + currentRoomCode);
@@ -317,7 +308,6 @@ async function updateMyScore() {
     });
 }
 
-// ============ أنهيت اللعبة ============
 async function finishMyGame() {
     initFirebase();
     const roomRef = db.ref("rooms/" + currentRoomCode);
@@ -325,6 +315,8 @@ async function finishMyGame() {
         finished: true,
         score: myScore
     });
+
+    playFanfare();
 
     document.getElementById("gameAnswers").innerHTML =
         `<div style="text-align: center; padding: 30px; color: #D4AF37; font-size: 20px; font-weight: 700;">
@@ -334,7 +326,6 @@ async function finishMyGame() {
     document.getElementById("gameQuestion").textContent = "🎉 انتهيت!";
 }
 
-// ============ تحديث النقاط ============
 function updateScores(room) {
     if (room.host) {
         document.getElementById("gameHostScore").textContent = room.host.score || 0;
@@ -344,7 +335,6 @@ function updateScores(room) {
     }
 }
 
-// ============ النتيجة النهائية ============
 function showOnlineResult(room) {
     const hostScore = room.host.score || 0;
     const guestScore = room.guest.score || 0;
@@ -373,10 +363,12 @@ function showOnlineResult(room) {
     document.getElementById("resultMessage").textContent = msg;
 
     showScreen("result");
+    playFanfare();
 }
 
-// ============ مغادرة الغرفة ============
 function leaveRoom() {
+    initAudio();
+    playClick();
     if (roomWatcher) roomWatcher();
     initFirebase();
     if (currentRoomCode && myRole) {
@@ -389,4 +381,4 @@ function leaveRoom() {
     }
     sessionStorage.clear();
     location.reload();
-      }
+}
