@@ -1,13 +1,11 @@
 // game.js
-// منطق لعبة "تحدي 30 ثانية"
+// منطق لعبة "تحدي 30 ثانية" - مع الأصوات
 
-// ============ إعدادات ============
 const TIMER_SECONDS = 30;
-const BONUS_FAST = 5;      // أول 5 ثواني = +1 نقطة
-const BONUS_QUICK = 10;    // أول 10 ثواني = +0.5 نقطة
-const CIRCLE_LENGTH = 238.76; // محيط الدائرة
+const BONUS_FAST = 5;
+const BONUS_QUICK = 10;
+const CIRCLE_LENGTH = 238.76;
 
-// ============ الحالة ============
 let questions = [];
 let currentIndex = 0;
 let score = 0;
@@ -16,8 +14,8 @@ let timeLeft = TIMER_SECONDS;
 let timerInterval = null;
 let answered = false;
 let questionStartTime = 0;
+let lastTickSecond = TIMER_SECONDS;
 
-// ============ عناصر الصفحة ============
 const elProgress = document.getElementById("qProgress");
 const elScore = document.getElementById("score");
 const elCorrect = document.getElementById("correctCount");
@@ -33,26 +31,21 @@ const elEndScreen = document.getElementById("endScreen");
 const elFinalScore = document.getElementById("finalScore");
 const elEndMessage = document.getElementById("endMessage");
 
-// ============ ترجمة الصعوبة ============
 const DIFF_LABEL = {
     easy: { text: "سهل", cls: "diff-easy" },
     medium: { text: "متوسط", cls: "diff-medium" },
     hard: { text: "صعب", cls: "diff-hard" }
 };
 
-const DIFF_POINTS = {
-    easy: 1,
-    medium: 2,
-    hard: 3
-};
+const DIFF_POINTS = { easy: 1, medium: 2, hard: 3 };
 
-// ============ بدء اللعبة ============
 function startGame() {
-    // نجيب 25 سؤال عشوائي
+    initAudio();
+    playWhistle();
+
     if (typeof getRandomQuestions === "function") {
         questions = getRandomQuestions();
     } else {
-        // fallback: نستخدم QUESTIONS مباشرة
         const shuffled = [...QUESTIONS].sort(() => Math.random() - 0.5);
         questions = shuffled.slice(0, 25);
     }
@@ -64,14 +57,12 @@ function startGame() {
     showQuestion();
 }
 
-// ============ شريط المعلومات ============
 function updateInfoBar() {
     elProgress.textContent = `${currentIndex + 1}/${questions.length}`;
     elScore.textContent = score;
     elCorrect.textContent = correctCount;
 }
 
-// ============ عرض السؤال ============
 function showQuestion() {
     answered = false;
 
@@ -81,17 +72,12 @@ function showQuestion() {
     }
 
     const q = questions[currentIndex];
-
-    // بطاقة الصعوبة
     const diff = DIFF_LABEL[q.d] || DIFF_LABEL.easy;
     elDiffBadge.textContent = diff.text;
     elDiffBadge.className = "difficulty-badge " + diff.cls;
-
-    // التصنيف + السؤال
     elCategory.textContent = q.cat || "";
     elQuestionText.textContent = q.q;
 
-    // الأجوبة
     elAnswersBox.innerHTML = "";
     q.o.forEach((option, i) => {
         const btn = document.createElement("button");
@@ -106,9 +92,9 @@ function showQuestion() {
     startTimer();
 }
 
-// ============ المؤقت ============
 function startTimer() {
     timeLeft = TIMER_SECONDS;
+    lastTickSecond = TIMER_SECONDS;
     questionStartTime = Date.now();
     updateTimerDisplay();
 
@@ -123,6 +109,11 @@ function startTimer() {
             if (!answered) handleTimeout();
             return;
         }
+        const currentSec = Math.ceil(timeLeft);
+        if (currentSec !== lastTickSecond && currentSec > 0 && currentSec <= 10) {
+            playTick();
+            lastTickSecond = currentSec;
+        }
         updateTimerDisplay();
     }, 100);
 }
@@ -130,11 +121,9 @@ function startTimer() {
 function updateTimerDisplay() {
     const t = Math.ceil(timeLeft);
     elTimerText.textContent = t;
-
     const progress = (timeLeft / TIMER_SECONDS) * CIRCLE_LENGTH;
     elTimerProgress.style.strokeDashoffset = CIRCLE_LENGTH - progress;
 
-    // تغيير اللون حسب الوقت
     elTimerBox.classList.remove("timer-warning", "timer-danger");
     if (timeLeft <= 5) {
         elTimerBox.classList.add("timer-danger");
@@ -143,7 +132,6 @@ function updateTimerDisplay() {
     }
 }
 
-// ============ معالجة الإجابة ============
 function handleAnswer(selectedIndex) {
     if (answered) return;
     answered = true;
@@ -153,7 +141,6 @@ function handleAnswer(selectedIndex) {
     const correctIndex = q.a;
     const isCorrect = selectedIndex === correctIndex;
 
-    // تلوين الأزرار
     const buttons = elAnswersBox.querySelectorAll(".answer-btn");
     buttons.forEach((btn, i) => {
         btn.disabled = true;
@@ -165,10 +152,9 @@ function handleAnswer(selectedIndex) {
     });
 
     if (isCorrect) {
+        playCorrect();
         correctCount++;
         const basePoints = DIFF_POINTS[q.d] || 1;
-
-        // حساب بونص السرعة
         const elapsed = (Date.now() - questionStartTime) / 1000;
         let bonus = 0;
         let bonusMsg = "";
@@ -181,32 +167,27 @@ function handleAnswer(selectedIndex) {
             bonusMsg = "💨 سريع! +0.5";
         }
 
-        const totalGain = basePoints + bonus;
-        score += totalGain;
-
+        score += basePoints + bonus;
         updateInfoBar();
 
-        if (bonus > 0) {
-            showBonus(bonusMsg);
-        }
+        if (bonus > 0) showBonus(bonusMsg);
+    } else {
+        playWrong();
     }
 
-    // الانتقال للسؤال التالي
     setTimeout(() => {
         currentIndex++;
         showQuestion();
     }, 1200);
 }
 
-// ============ انتهى الوقت ============
 function handleTimeout() {
     if (answered) return;
     answered = true;
+    playWrong();
 
     const q = questions[currentIndex];
     const correctIndex = q.a;
-
-    // نلون الجواب الصحيح
     const buttons = elAnswersBox.querySelectorAll(".answer-btn");
     buttons.forEach((btn, i) => {
         btn.disabled = true;
@@ -221,19 +202,17 @@ function handleTimeout() {
     }, 1200);
 }
 
-// ============ بونص ============
 function showBonus(message) {
     const popup = document.createElement("div");
     popup.className = "bonus-popup";
     popup.textContent = message;
     document.body.appendChild(popup);
-
     setTimeout(() => popup.remove(), 1000);
 }
 
-// ============ نهاية اللعبة ============
 function endGame() {
     clearInterval(timerInterval);
+    playFanfare();
 
     elQuestionArea.classList.add("hidden");
     elTimerBox.classList.add("hidden");
@@ -241,7 +220,6 @@ function endGame() {
 
     elFinalScore.textContent = score;
 
-    // رسالة تحفيزية
     const total = questions.length;
     const percent = (correctCount / total) * 100;
 
@@ -255,5 +233,4 @@ function endGame() {
     elEndMessage.innerHTML = `${msg}<br><br>جاوبت صح ${correctCount} من ${total}`;
 }
 
-// ============ بدء تلقائي ============
 document.addEventListener("DOMContentLoaded", startGame);
